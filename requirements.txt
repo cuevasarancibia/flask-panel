@@ -1,3 +1,5 @@
 Flask
 pymysql
 python-dotenv
+pandas
+openpyxl
