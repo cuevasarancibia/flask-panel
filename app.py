@@ -178,9 +178,15 @@ def exportar():
             df.to_excel(writer, index=False, sheet_name="Datos")
 
     output.seek(0)
-    return send_file(output, download_name="clientes_filtrados.xlsx", as_attachment=True)
+    return send_file(
+        output,
+        download_name="clientes_filtrados.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 8000))
     app.run(host='0.0.0.0', port=port)
+
