@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Filtros</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        td {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container">
+        <h2 class="mb-4">Panel de Filtros</h2>
+        <form method="POST">
+            <div class="row g-2">
+                <div class="col-md-2">
+                    <label for="min_lineas">Líneas (mín.)</label>
+                    <input type="number" class="form-control" name="min_lineas" value="{{ filters.min_lineas }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="max_lineas">Líneas (máx.)</label>
+                    <input type="number" class="form-control" name="max_lineas" value="{{ filters.max_lineas }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="lineas_exactas">Líneas exactas</label>
+                    <input type="number" class="form-control" name="lineas_exactas" value="{{ filters.lineas_exactas }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="cargo_fijo_min">Cargo fijo mín.</label>
+                    <input type="number" step="any" class="form-control" name="cargo_fijo_min" value="{{ filters.cargo_fijo_min }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="bloqueado_mail">Bloqueado mail</label>
+                    <select class="form-select" name="bloqueado_mail">
+                        <option value="" {% if not filters.bloqueado_mail %}selected{% endif %}>Todos</option>
+                        <option value="si" {% if filters.bloqueado_mail == 'si' %}selected{% endif %}>Sí</option>
+                        <option value="no" {% if filters.bloqueado_mail == 'no' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="inicio_actividad">Inicio actividad</label>
+                    <select class="form-select" name="inicio_actividad">
+                        <option value="" {% if not filters.inicio_actividad %}selected{% endif %}>Todos</option>
+                        <option value="si" {% if filters.inicio_actividad == 'si' %}selected{% endif %}>Sí</option>
+                        <option value="no" {% if filters.inicio_actividad == 'no' %}selected{% endif %}>No</option>
+                        <option value="pendiente" {% if filters.inicio_actividad == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="ciudad">Ciudad</label>
+                    <select multiple class="form-select" name="ciudad">
+                        {% for ciudad in ciudades %}
+                        <option value="{{ ciudad }}" {% if ciudad in filters.ciudades %}selected{% endif %}>{{ ciudad }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="compania">Compañía</label>
+                    <select multiple class="form-select" name="compania">
+                        {% for compania in companias %}
+                        <option value="{{ compania }}" {% if compania in filters.companias %}selected{% endif %}>{{ compania }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="dias_sin_uso">Días sin uso</label>
+                    <input type="number" class="form-control" name="dias_sin_uso" value="{{ filters.dias_sin_uso }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="motivo_utilizacion">Excluir motivos</label>
+                    <select multiple class="form-select" name="motivo_utilizacion">
+                        <option value="predictivo" {% if 'predictivo' in filters.motivo_utilizacion %}selected{% endif %}>Predictivo</option>
+                        <option value="masivomail" {% if 'masivomail' in filters.motivo_utilizacion %}selected{% endif %}>Masivo Mail</option>
+                        <option value="otro" {% if 'otro' in filters.motivo_utilizacion %}selected{% endif %}>Otro / Análisis</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="fecha_utilizacion">Fechas uso</label>
+                    <select multiple class="form-select" name="fecha_utilizacion">
+                        {% for fecha in fechas_utilizadas %}
+                        <option value="{{ fecha }}" {% if fecha in filters.fecha_utilizacion %}selected{% endif %}>{{ fecha }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+                <a href="/" class="btn btn-secondary">Resetear filtros</a>
+            </div>
+        </form>
+
+        {% if data %}
+        <div class="mt-4">
+            <p><strong>Total de líneas:</strong> {{ total_lineas }} | <strong>Total de clientes:</strong> {{ total_clientes }}</p>
+            <form method="POST" action="/exportar">
+                {% for key, value in filters.items() %}
+                    {% if value %}
+                        {% if value is iterable and value is not string %}
+                            {% for item in value %}
+                                <input type="hidden" name="{{ key }}" value="{{ item }}">
+                            {% endfor %}
+                        {% else %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <select class="form-select" name="motivo" required>
+                            <option value="">Seleccione motivo de descarga</option>
+                            <option value="predictivo">Predictivo</option>
+                            <option value="masivomail">Masivo Mail</option>
+                            <option value="otro">Otro / Análisis</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success">Descargar Excel</button>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            {% for key in data[0].keys() %}
+                            <th>{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
