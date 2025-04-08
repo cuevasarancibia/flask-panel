@@ -4,3 +4,4 @@ pymysql
 python-dotenv
 openpyxl
 gunicorn
+xlsxwriter
