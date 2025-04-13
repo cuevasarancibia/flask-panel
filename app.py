@@ -91,8 +91,10 @@ def aplicar_filtros(filters, limitar=True):
     # Filtro para correos de Gmail
     if filters.get('gmail_filter') == 'gmail':
         condiciones.append("MAIL LIKE '%@gmail.com%'")
+        params.append('%@gmail.com%')
     elif filters.get('gmail_filter') == 'nogmail':
         condiciones.append("MAIL NOT LIKE '%@gmail.com%'")
+        params.append('%@gmail.com%')
 
     condiciones.append("RUT NOT IN (SELECT rut FROM clientes_vendidos)")
 
