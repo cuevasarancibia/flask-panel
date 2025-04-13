@@ -51,6 +51,14 @@
                         <option value="pendiente" {% if filters.inicio_actividad == 'pendiente' %}selected{% endif %}>Pendiente</option>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <label for="gmail_filter">Correo</label>
+                    <select class="form-select" name="gmail_filter">
+                        <option value="todos" {% if filters.gmail_filter == 'todos' %}selected{% endif %}>Todos</option>
+                        <option value="gmail" {% if filters.gmail_filter == 'gmail' %}selected{% endif %}>Gmail</option>
+                        <option value="nogmail" {% if filters.gmail_filter == 'nogmail' %}selected{% endif %}>No Gmail</option>
+                    </select>
+                </div>
                 <div class="col-md-3">
                     <label for="ciudad">Ciudad</label>
                     <select multiple class="form-select" name="ciudad">
