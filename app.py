@@ -88,6 +88,12 @@ def aplicar_filtros(filters, limitar=True):
         condiciones.append("(RUT IN (SELECT rut FROM historial_descargas WHERE fecha_utilizacion IN (%s)))" % ",".join(["%s"] * len(fechas)))
         params.extend(fechas)
 
+    # Filtro para correos de Gmail
+    if filters.get('gmail_filter') == 'gmail':
+        condiciones.append("MAIL LIKE '%@gmail.com%'")
+    elif filters.get('gmail_filter') == 'nogmail':
+        condiciones.append("MAIL NOT LIKE '%@gmail.com%'")
+
     condiciones.append("RUT NOT IN (SELECT rut FROM clientes_vendidos)")
 
     where_clause = " AND ".join(condiciones)
@@ -124,7 +130,8 @@ def index():
         'companias': request.form.getlist('compania'),
         'dias_sin_uso': request.form.get('dias_sin_uso'),
         'motivo_utilizacion': request.form.getlist('motivo_utilizacion'),
-        'fecha_utilizacion': request.form.getlist('fecha_utilizacion')
+        'fecha_utilizacion': request.form.getlist('fecha_utilizacion'),
+        'gmail_filter': request.form.get('gmail_filter')
     }
 
     ciudades, companias, fechas = obtener_valores_unicos()
@@ -151,7 +158,8 @@ def exportar():
         'companias': request.form.getlist('compania'),
         'dias_sin_uso': request.form.get('dias_sin_uso'),
         'motivo_utilizacion': request.form.getlist('motivo_utilizacion'),
-        'fecha_utilizacion': request.form.getlist('fecha_utilizacion')
+        'fecha_utilizacion': request.form.getlist('fecha_utilizacion'),
+        'gmail_filter': request.form.get('gmail_filter')
     }
 
     motivo = request.form.get('motivo')
@@ -189,4 +197,5 @@ if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 8000))
     app.run(host='0.0.0.0', port=port)
+
 
